@@ -238,63 +238,81 @@ class MinimaxPlayer(IsolationPlayer):
         # I think this is good opportunity to use recursion. While we still have
         # time on the clock, run as deep within the search tree, returning the
         # return the best move and score available.
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
+
+        # FIXME remove for now
+        #if self.time_left() < self.TIMER_THRESHOLD:
+        #    raise SearchTimeout()
 
         # FIXME Should there be a win/lose control flow here?
 
         # FIXME There needs to be some control flow to account for the absence
         # of leagal moves
 
-        # Get all of the legal moves for the current board state
-        legal_moves = game.get_legal_moves(game.active_player)
-
         # Initialize some defaults to hold score and move values
-        try:
-            best_score, best_move
-        except NameError:
-            best_score = float('-inf')
-            best_move = (-1, -1)
+        best_move = (-1, -1)
+        best_score = float('-inf')
 
-        # Address depth 0. If we are not forecasting moves from beyond our current
-        # layer, return the first move on the left (depth-first standard)
-        if (depth == 0):
-            return legal_moves[0]
+        def score_through_depth(game, depth):
 
-        # FIXME perhaps there should be some try/except control for for the timer
+            """This is a helper function to calculate the score of one
+            available move
 
-        # If we ARE going to forecast deeper, we need to itteate potential
-        # game futures, returning max choices (scores and moves) for max nodes,
-        # and min choices for min nodes.
+            Parameters
+            ----------
+            game : isolation.Board
+                Isoloation board that has been forecasted from a previous
+                level
 
-        for move in legal_moves:
-            # FIXME For exery move, ensure that we're not hitting the time limit
+            depth : int
+                Current depth of forecast -- updates as iteration
+            """
 
-            # Here comes the recursion. Assigning a score and a move for this
-            # level of depth within the search tree
-            forecasted_level = game.forecast_move(move)
+            # Add conditions to check for timeout, and depth == 0
+            # FIXME remove these calls for now
+            #if self.time_left() < self.TIMER_THRESHOLD:
+            #    raise SearchTimeout()
 
-            # Calculate the score for this forecasted level and avoid inf recursion
-            # by adjusting depth
-            score, _ = self.minimax(forecasted_level, depth - 1)
+            # Return score when we reach depth
+            if depth == 0:
+                return self.score(game, self)
 
-            # If we're looking at a maximizing node, we will overwrite the score
-            # if the score is larger.
-            if game.active_player() == self:
-                if score > best_score:
-                    best_score = score
-                    best_move = move
+            # Initialize a variable to hold our scores
+            try:
+                best_score
+            except NameError:
+                best_score = self.score(game, self)
+                #best_score = float('-inf')
+                best_move = (-1, -1)
 
-            # Condition where the minimizing player is up
-            else:
-                if score < best_score:
-                    best_score = score
-                    best_move = move
+            # Add control flow to account for minimizing and maximizing
+            # nodes
+            node_identify = max if game.active_player == self else min
 
-        if depth == 0:
-            return best_move
-        else:
-            return best_score, best_move
+            # FIXME do we need to adjust depth here?
+            for recursion_move in game.get_legal_moves():
+
+                    score = score_through_depth(game.forecast_move(recursion_move), depth - 1)
+
+                    best_score = node_identify(score, best_score)
+
+            return best_score
+
+        # Top level moves -- these are all of the moves that we are
+        # evaluating through depth
+        for move in game.get_legal_moves():
+
+            # For each move
+            score = score_through_depth(game.forecast_move(move), depth - 1)
+
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        return best_move
+
+
+
+
 
 
 class AlphaBetaPlayer(IsolationPlayer):
@@ -333,14 +351,21 @@ class AlphaBetaPlayer(IsolationPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        # FIXME Not really sure how to use this yet
+        # FIXME I think this is more complicated than currently expressed.
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        best_move = (-1, -1)
 
-        # This first section is intended to implement iterative deepening.
+        try:
+            # FIXME I think we need to modify the arguments that are used
+            # in this function.
+            return self.alphabeta(game, self.search_depth)
 
-        # This involves going level by level,
+        except SearchTimeout:
+            pass
+
+        return best_move
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
