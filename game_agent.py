@@ -35,7 +35,30 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+
+    # FIXME I think we might be able to look at score methods in the player classes
+    # for more context on how this should be done.
+
+    # FIXME Check the testing code -- it looks as though the titles for our players
+    # could be different here...?
+
+    # Cover the win/lose scenarios
+    if game.is_loser(player):
+        return float("-inf")
+
+    elif game.is_winner(player):
+        return float("inf")
+
+    # Score optional moves. In this case, I'm just using a modified version of the
+    # weighted my_move - opponent_moves evaluation function covered in lectures.
+    else:
+        # Adjust to change the importance of opponent moves
+        weight = 2.0
+
+        my_moves = len(game.get_legal_moves(player))
+        opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+        return my_moves - (opponent_moves * weight)
 
 
 def custom_score_2(game, player):
@@ -63,6 +86,8 @@ def custom_score_2(game, player):
     # TODO: finish this function!
     raise NotImplementedError
 
+    # FIXME This appear to just be another run of the eavlutation function,
+    # so we can test multiple attempts at quantifying.
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -89,6 +114,7 @@ def custom_score_3(game, player):
     # TODO: finish this function!
     raise NotImplementedError
 
+    # FIXME As above, test multiple attempts at quantifying.
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -209,11 +235,66 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+        # I think this is good opportunity to use recursion. While we still have
+        # time on the clock, run as deep within the search tree, returning the
+        # return the best move and score available.
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        # FIXME Should there be a win/lose control flow here?
+
+        # FIXME There needs to be some control flow to account for the absence
+        # of leagal moves
+
+        # Get all of the legal moves for the current board state
+        legal_moves = game.get_legal_moves(game.active_player)
+
+        # Initialize some defaults to hold score and move values
+        try:
+            best_score, best_move
+        except NameError:
+            best_score = float('-inf')
+            best_move = (-1, -1)
+
+        # Address depth 0. If we are not forecasting moves from beyond our current
+        # layer, return the first move on the left (depth-first standard)
+        if (depth == 0):
+            return legal_moves[0]
+
+        # FIXME perhaps there should be some try/except control for for the timer
+
+        # If we ARE going to forecast deeper, we need to itteate potential
+        # game futures, returning max choices (scores and moves) for max nodes,
+        # and min choices for min nodes.
+
+        for move in legal_moves:
+            # FIXME For exery move, ensure that we're not hitting the time limit
+
+            # Here comes the recursion. Assigning a score and a move for this
+            # level of depth within the search tree
+            forecasted_level = game.forecast_move(move)
+
+            # Calculate the score for this forecasted level and avoid inf recursion
+            # by adjusting depth
+            score, _ = self.minimax(forecasted_level, depth - 1)
+
+            # If we're looking at a maximizing node, we will overwrite the score
+            # if the score is larger.
+            if game.active_player() == self:
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+            # Condition where the minimizing player is up
+            else:
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+        if depth == 0:
+            return best_move
+        else:
+            return best_score, best_move
 
 
 class AlphaBetaPlayer(IsolationPlayer):
@@ -256,6 +337,11 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # TODO: finish this function!
         raise NotImplementedError
+
+        # This first section is intended to implement iterative deepening.
+
+        # This involves going level by level,
+
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
