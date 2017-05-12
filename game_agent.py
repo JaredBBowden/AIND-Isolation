@@ -433,5 +433,87 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        def alpha_beta_search():
+            """
+            Helper function as framed in AIMA text
+
+            """
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            # FIXME Call the max function find an array of fixed values.
+
+            # return a value within the available state that has a value
+            # within the above array.
+
+            # So, I think what we're doing here is saying: from the legal
+            # moves we have at our disposal, which of thse moves are
+            # match within the array above.
+
+            # I kinda need to understand what this array contains...
+
+
+        # FIXME The following functions aare basically mirror images,
+        # with the exception of min and max
+
+        def alpha_beta_max():
+            """
+            Helper function, as framed in AIMA text
+
+            """
+            # FIXME add more detail to this doc string
+
+            # Terminal state: timer
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            # Final depth
+            if depth == 0:
+                return self.score(game, self)
+
+            # Intialize a variable to hold our max value
+            v = float("inf")
+
+            # Iterate over legal moves and return values where our value (v)
+            # updates to either the current value, or the values returned
+            # by alpha_beta_min. Each call goes a level deeper.
+            for move in game.get_legal_moves():
+
+                # Forecast a level deeper
+                v = max(v, alpha_beta_min(game.forecast_move(move)), depth - 1, alpha, beta))
+
+                if v >= beta:
+                    return v
+
+                alpha = max(alpha, v)
+
+            return v
+
+
+        def alpha_beta_min():
+            """
+            Helper function, as framed in AIMA text
+
+            """
+            # FIXME add more detail to this doc string
+
+            # Terminal state: timer (as above)
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            # Final depth
+            if depth == 0:
+                return self.score(game, self)
+
+
+            or move in game.get_legal_moves():
+
+                # Forecast a level deeper
+                v = max(v, alpha_beta_max(game.forecast_move(move)), depth - 1, alpha, beta))
+
+                if v <= alpha:
+                    return v
+
+                beta = min(beta, v)
+
+            return v
