@@ -366,7 +366,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 best_move = center_square
                 return best_mov
         """
-        
+
         best_move = (-1, -1)
 
         try:
@@ -437,6 +437,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # TODO It strikes me that we're using this "terminal state" code in
         # several places. Might be cleaner to refactor and recycle.
+        # FIXME this is not the first time I've commented this in here.
 
         # FIXME do we really need this here? This is going to be the first
         # thing we hit...
@@ -445,27 +446,52 @@ class AlphaBetaPlayer(IsolationPlayer):
         if depth == 0:
             return self.score(game, self)
 
-        # Control flow to check for legal moves available
-        legal_moves = game.get_legal_moves()
-        if not legal_moves:
-            best_move = (-1, -1)
-
+        # Intialize a best move variable
+        best_move = (-1, -1)
         best_score = float("-inf")
 
+        legal_moves = game.get_legal_moves()
+
+        # Control flow to check for legal moves available
+        # FIXME Again, I'm a little perplexe by the need to this additional
+        # check.
+        if not legal_moves or len(legal_moves)==0:
+            return best_move
+
+        # In the case where we have moves to work with, search the game tree
+        # with alpha beta thresholds.
         for move in legal_moves:
 
-            v = max(v, self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta))
-            if v > alpha:
+            v = self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta)
+
+            # FIXME clear up documentation in both of these levels
+            #if v > alpha:
+            #    best_move = move
+            #    alpha = v
+
+            #if v >= beta:
+            #    return move
+
+            if v > best_score:
+                best_score = v
                 best_move = move
-                alpha = v
+
+            if best_score >= beta:
+                return move
+
+            # Reset alpha
+            alpha = max(alpha, best_score)
+
+
 
         return best_move
-
 
 
     def alpha_beta_max(self, game, depth, alpha, beta):
         """
         Helper function, as framed in AIMA text
+
+        Itterate through the game tree and compute an alpha threshold
 
         """
         # FIXME add more detail to this doc string
@@ -479,7 +505,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             return self.score(game, self)
 
         # Intialize a variable to hold our max value
-        v = float("inf")
+        v = float("-inf")
 
         # Iterate over legal moves and return values where our value (v)
         # updates to either the current value, or the values returned
@@ -499,7 +525,9 @@ class AlphaBetaPlayer(IsolationPlayer):
 
     def alpha_beta_min(self, game, depth, alpha, beta):
         """
-        Helper function, as framed in AIMA text
+        Helper function, as framed in AIMA text.
+
+        Itterate through the game tree and compute a beta threshold
 
         """
         # FIXME add more detail to this doc string
@@ -512,11 +540,13 @@ class AlphaBetaPlayer(IsolationPlayer):
         if depth == 0:
             return self.score(game, self)
 
+        # Intialize a variable to hold our max value
+        v = float("inf")
 
         for move in game.get_legal_moves():
 
             # Forecast a level deeper
-            v = max(v, self.alpha_beta_max(game.forecast_move(move), depth - 1, alpha, beta))
+            v = min(v, self.alpha_beta_max(game.forecast_move(move), depth - 1, alpha, beta))
 
             if v <= alpha:
                 return v
