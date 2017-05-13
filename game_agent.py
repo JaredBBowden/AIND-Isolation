@@ -52,13 +52,29 @@ def custom_score(game, player):
     # Score optional moves. In this case, I'm just using a modified version of the
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
-        # Adjust to change the importance of opponent moves
-        weight = 2.0
+
+        def distance_from_center(legal_moves):
+            """
+            Compute the mean absolute distance of all available legal moves
+            from the center square.
+
+            Assumes a 7x7 board
+
+            """
+            try:
+                return sum(distance_from_center) / float(len(distance_from_center))
+            except:
+                return 0
+
+
 
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        return my_moves - (opponent_moves * weight)
+        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
+        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
+
+        return (my_moves - my_abs_center_dist) - (opponent_moves - opponent_abs_center_dist)
 
 
 def custom_score_2(game, player):
@@ -83,11 +99,41 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
 
-    # FIXME This appear to just be another run of the eavlutation function,
-    # so we can test multiple attempts at quantifying.
+    if game.is_loser(player):
+        return float("-inf")
+
+    elif game.is_winner(player):
+        return float("inf")
+
+    # Score optional moves. In this case, I'm just using a modified version of the
+    # weighted my_move - opponent_moves evaluation function covered in lectures.
+    else:
+        def distance_from_center(legal_moves):
+            """
+            Compute the mean absolute distance of all available legal moves
+            from the center square.
+
+            Assumes a 7x7 board
+
+            """
+            try:
+                return sum(distance_from_center) / float(len(distance_from_center))
+            except:
+                return 0
+
+
+
+
+        my_moves = len(game.get_legal_moves(player))
+        opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
+        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
+
+        return (my_moves - my_abs_center_dist) - (opponent_moves - opponent_abs_center_dist)
+
+
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -111,10 +157,38 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
 
-    # FIXME As above, test multiple attempts at quantifying.
+    elif game.is_winner(player):
+        return float("inf")
+
+    # Score optional moves. In this case, I'm just using a modified version of the
+    # weighted my_move - opponent_moves evaluation function covered in lectures.
+    else:
+        def distance_from_center(legal_moves):
+            """
+            Compute the mean absolute distance of all available legal moves
+            from the center square.
+
+            Assumes a 7x7 board
+
+            """
+            distance_from_center = [abs(x[0] - 3) + abs(x[1] - 3) for x in legal_moves]
+
+            try:
+                return sum(distance_from_center) / float(len(distance_from_center))
+            except:
+                return 0
+
+
+        my_moves = len(game.get_legal_moves(player))
+        opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
+        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
+
+        return (my_moves - my_abs_center_dist) - (opponent_moves - (opponent_abs_center_dist * 2))
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -439,14 +513,17 @@ class AlphaBetaPlayer(IsolationPlayer):
         # several places. Might be cleaner to refactor and recycle.
         # FIXME this is not the first time I've commented this in here.
 
-        # FIXME do we really need this here? This is going to be the first
-        # thing we hit...
+        # TODO Are there performance gains that could be realized here
+        # by reordering values?
+
+        # FIXME added out of habit, but do we really need this here? This is
+        # going to be the first thing we hit -- no recursion.
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         if depth == 0:
             return self.score(game, self)
 
-        # Intialize a best move variable
+        # Intialize empty variables
         best_move = (-1, -1)
         best_score = float("-inf")
 
@@ -464,13 +541,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
             v = self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta)
 
-            # FIXME clear up documentation in both of these levels
-            #if v > alpha:
-            #    best_move = move
-            #    alpha = v
-
-            #if v >= beta:
-            #    return move
+            # FIXME clear up documentation in both of these level
 
             if v > best_score:
                 best_score = v
@@ -479,10 +550,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             if best_score >= beta:
                 return move
 
-            # Reset alpha
             alpha = max(alpha, best_score)
-
-
 
         return best_move
 
@@ -491,7 +559,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         Helper function, as framed in AIMA text
 
-        Itterate through the game tree and compute an alpha threshold
+        Itterate through the game tree and compute an alpha threshold --
+        this will provide
 
         """
         # FIXME add more detail to this doc string
@@ -509,7 +578,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # Iterate over legal moves and return values where our value (v)
         # updates to either the current value, or the values returned
-        # by alpha_beta_min. Each call goes a level deeper.
+        # by alpha_beta_min. Each iteration goes a level deeper.
         for move in game.get_legal_moves():
 
             # Forecast a level deeper
@@ -527,7 +596,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         Helper function, as framed in AIMA text.
 
-        Itterate through the game tree and compute a beta threshold
+        Itterate through the game tree and compute a beta threshold --
+        the minimum UPPER bound.
 
         """
         # FIXME add more detail to this doc string
