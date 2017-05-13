@@ -53,29 +53,13 @@ def custom_score(game, player):
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
-        def distance_from_center(legal_moves):
-            """
-            Compute the mean absolute distance of all available legal moves
-            from the center square.
-
-            Assumes a 7x7 board
-
-            """
-            try:
-                return sum(distance_from_center) / float(len(distance_from_center))
-            except:
-                return 0
-
-
-
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
-        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
-
-        return (my_moves - my_abs_center_dist) - (opponent_moves - opponent_abs_center_dist)
-
+        try:
+            return my_moves / opponent_moves
+        except:
+            return my_moves
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -109,31 +93,21 @@ def custom_score_2(game, player):
     # Score optional moves. In this case, I'm just using a modified version of the
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
-        def distance_from_center(legal_moves):
-            """
-            Compute the mean absolute distance of all available legal moves
-            from the center square.
 
-            Assumes a 7x7 board
+        def center_classification(legal_moves):
 
-            """
-            try:
-                return sum(distance_from_center) / float(len(distance_from_center))
-            except:
+            if (3,3) in legal_moves:
+                return 5
+            else:
                 return 0
-
-
-
 
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
-        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
+        my_center_bonus = center_classification(game.get_legal_moves(player))
+        opponent_center_bonus = center_classification(game.get_legal_moves(player))
 
-        return (my_moves - my_abs_center_dist) - (opponent_moves - opponent_abs_center_dist)
-
-
+        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -166,29 +140,21 @@ def custom_score_3(game, player):
     # Score optional moves. In this case, I'm just using a modified version of the
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
-        def distance_from_center(legal_moves):
-            """
-            Compute the mean absolute distance of all available legal moves
-            from the center square.
 
-            Assumes a 7x7 board
+        def center_classification(legal_moves):
 
-            """
-            distance_from_center = [abs(x[0] - 3) + abs(x[1] - 3) for x in legal_moves]
-
-            try:
-                return sum(distance_from_center) / float(len(distance_from_center))
-            except:
+            if (3,3) in legal_moves:
+                return 10
+            else:
                 return 0
-
 
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
-        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
+        my_center_bonus = center_classification(game.get_legal_moves(player))
+        opponent_center_bonus = center_classification(game.get_legal_moves(player))
 
-        return (my_moves - my_abs_center_dist) - (opponent_moves - (opponent_abs_center_dist * 2))
+        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
