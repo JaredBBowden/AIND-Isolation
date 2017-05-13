@@ -341,6 +341,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Timer
         self.time_left = time_left
 
+        """
         # Get the current moves we have to work with
         legal_moves = game.get_legal_moves()
 
@@ -348,52 +349,40 @@ class AlphaBetaPlayer(IsolationPlayer):
         if not legal_moves:
             return (-1, -1)
 
-        # This is where we should consider our "opening book". Let's
-        # incorporate our understanding of the best possible opening moves.
+        #################################
+        # Is where we should consider our "opening book?
+        # Incorporate our understanding of the best possible opening moves.
         # We could get much more complicated with this; at present, move to
         # the center square if it's one of our legal moves.
 
         # Find the center square. Account for the chance that the board
         # could be different sizes. And remember zero indexing!
         if (board.height % 2  == 0) and (board.height % 2  == 0):  # Quick check for symmetry
+
             center_square = ((board.width / 2), (board.height / 2))
 
-        # If the center square is available as a legal move, return that
-        if center_square in legal_moves:
-            move = center_square
-            return best_move
-
-        # In the case where the center move wasn't available, we have to get
-        # a little more complicated. Here, we're going to iterate as
-        # deep as we can
-
-        # Work within framework established through the minimax
-        # method, above
-
-        # Initialize the best move so that this function returns something
-        # in case the search fails due to timeout
+            # If the center square is available as a legal move, return that
+            if center_square in legal_moves:
+                best_move = center_square
+                return best_mov
+        """
+        
         best_move = (-1, -1)
 
-        # FIXME the overall logic is fairly clear: as long as we have time,
-        # and we're below the limit, we want to iterate as deep as we can.
-
         try:
-
             # Go as deep as we can with AlphaBeta search until we find the
             # best move or run our of time
-
-            # FIXME I'm a little unclear on the use of depth here. Basically,
-            # I'm not really sure if we want to be iterating up or down.
             depth = 1
+
             while True:
                 best_move = self.alphabeta(game, depth)
+                depth += 1
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
 
         # Return the best move from the last completed search iteration
         return best_move
-        ###############################################################
 
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
@@ -465,7 +454,13 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         for move in legal_moves:
 
-            print("I need to fix this")
+            v = max(v, self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta))
+            if v > alpha:
+                best_move = move
+                alpha = v
+
+        return best_move
+
 
 
     def alpha_beta_max(self, game, depth, alpha, beta):
@@ -492,7 +487,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         for move in game.get_legal_moves():
 
             # Forecast a level deeper
-            v = max(v, alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta))
+            v = max(v, self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta))
 
             if v >= beta:
                 return v
@@ -521,7 +516,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         for move in game.get_legal_moves():
 
             # Forecast a level deeper
-            v = max(v, alpha_beta_max(game.forecast_move(move), depth - 1, alpha, beta))
+            v = max(v, self.alpha_beta_max(game.forecast_move(move), depth - 1, alpha, beta))
 
             if v <= alpha:
                 return v
