@@ -235,59 +235,70 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
-        # I think this is good opportunity to use recursion. While we still have
-        # time on the clock, run as deep within the search tree, returning the
-        # return the best move and score available.
-
-        # Incremental steps
-        # 1. Itterate through all current legal moves
-        # 2. Forecast the next moves available to each level.
-
-        # FIXME remove for now
-        #if self.time_left() < self.TIMER_THRESHOLD:
-        #    raise SearchTimeout()
-
-        # FIXME Should there be a win/lose control flow here?
-
-
-        # FIXME I'm no longer sure that this is going to be required
-        #try:
-        #    best_score
-        #except NameError:
-        #    best_score = float('-inf')
-        #    best_move = (-1, -1)
-
-        # All possible legal moves for the current board state
-
-        # FIXME There needs to be some control flow to account for the absence
-        # of leagal moves. What do we do in this case? What score do we return?
-
+        # Top level moves to evaluate
         legal_moves = game.get_legal_moves()
 
-        # Add control flow to acknowledge the minimizing and maximizing
-        # identity of the game state
-        node_identity = max if game.active_player == self else min
+        # Control flow for situations where we don't have any legal moves.
+        if not legal_moves  or len(legal_moves) == 0:
+             best_move =  (-1, -1)
+             return best_move
 
-        # When we get to depth, consider the score of all nodes, and the
-        # identity of the node that will make a selection based on these
-        # options.
-        if depth == 1:
-            for move in legal_moves:
+        # Initalize some place-holder variables
+        best_score = float("-inf")
+        best_move = (-1, -1)
 
-                best_score, best_move = node_identity((score, move), (best_score, best_move))
-
-                return best_move
-
-        # Make a dicionary with original moves and bottom moves?
-
-        # Itterate to depth
         for move in legal_moves:
+            temp_score = self.min_value(game.forecast_move(move), depth - 1)
 
-            recursion_move = self.minimax(game.forecast_move(move), depth - 1)
+            if temp_score > best_score:
 
-            _, best_move = node_identity((score, move), (best_score, best_move))
+                # Update best scores and moves
+                best_score = temp_score
+                best_move = move
 
-        return recursion_move
+        return best_move
+
+    def max_value(self, game, depth):
+        """
+
+        """
+        # FIXME improve docstring here
+
+        # Control flow for terminal condition / final depth
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        if depth == 0:
+            return self.score(game, self)
+
+        # Initialize a variable to hold our score
+        best_score = float("-inf")
+
+        for move in game.get_legal_moves():
+            best_score = max(best_score, self.min_value(game.forecast_move(move), depth - 1))
+
+        return best_score
+
+    def min_value(self, game, depth):
+        """
+
+        """
+        # FIXME improve docstring here
+
+        # TODO this terminal condition code is starting to get repetitious.
+        # consider a refactor
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if depth == 0:
+            return self.score(game, self)
+
+        best_score = float("inf")
+
+        for move in game.get_legal_moves():
+            best_score = min(best_score, self.max_value(game.forecast_move(move), depth - 1))
+
+        return best_score
 
 
 class AlphaBetaPlayer(IsolationPlayer):
@@ -430,90 +441,94 @@ class AlphaBetaPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+
+        # FIXME The following functions are basically mirror images,
+        # with the exception of min and max. I think we could work to make
+        # these function names a little better.
+
+        # TODO It strikes me that we're using this "terminal state" code in
+        # several places. Might be cleaner to refactor and recycle.
+
+        # FIXME do we really need this here? This is going to be the first
+        # thing we hit...
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        if depth == 0:
+            return self.score(game, self)
+
+        # Control flow to check for legal moves available
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            best_move = (-1, -1)
+
+        best_score = float("-inf")
+
+        for move in legal_moves:
+
+            print("I need to fix this")
+
+
+    def alpha_beta_max(self, game, depth, alpha, beta):
+        """
+        Helper function, as framed in AIMA text
+
+        """
+        # FIXME add more detail to this doc string
+
+        # Terminal state: timer
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        def alpha_beta_search():
-            """
-            Helper function as framed in AIMA text
+        # Final depth
+        if depth == 0:
+            return self.score(game, self)
 
-            """
-            if self.time_left() < self.TIMER_THRESHOLD:
-                raise SearchTimeout()
+        # Intialize a variable to hold our max value
+        v = float("inf")
 
-            # FIXME Call the max function find an array of fixed values.
+        # Iterate over legal moves and return values where our value (v)
+        # updates to either the current value, or the values returned
+        # by alpha_beta_min. Each call goes a level deeper.
+        for move in game.get_legal_moves():
 
-            # return a value within the available state that has a value
-            # within the above array.
+            # Forecast a level deeper
+            v = max(v, alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta))
 
-            # So, I think what we're doing here is saying: from the legal
-            # moves we have at our disposal, which of thse moves are
-            # match within the array above.
+            if v >= beta:
+                return v
 
-            # I kinda need to understand what this array contains...
+            alpha = max(alpha, v)
 
-
-        # FIXME The following functions aare basically mirror images,
-        # with the exception of min and max
-
-        def alpha_beta_max():
-            """
-            Helper function, as framed in AIMA text
-
-            """
-            # FIXME add more detail to this doc string
-
-            # Terminal state: timer
-            if self.time_left() < self.TIMER_THRESHOLD:
-                raise SearchTimeout()
-
-            # Final depth
-            if depth == 0:
-                return self.score(game, self)
-
-            # Intialize a variable to hold our max value
-            v = float("inf")
-
-            # Iterate over legal moves and return values where our value (v)
-            # updates to either the current value, or the values returned
-            # by alpha_beta_min. Each call goes a level deeper.
-            for move in game.get_legal_moves():
-
-                # Forecast a level deeper
-                v = max(v, alpha_beta_min(game.forecast_move(move)), depth - 1, alpha, beta))
-
-                if v >= beta:
-                    return v
-
-                alpha = max(alpha, v)
-
-            return v
+        return v
 
 
-        def alpha_beta_min():
-            """
-            Helper function, as framed in AIMA text
+    def alpha_beta_min(self, game, depth, alpha, beta):
+        """
+        Helper function, as framed in AIMA text
 
-            """
-            # FIXME add more detail to this doc string
+        """
+        # FIXME add more detail to this doc string
 
-            # Terminal state: timer (as above)
-            if self.time_left() < self.TIMER_THRESHOLD:
-                raise SearchTimeout()
+        # Terminal state: timer (as above)
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
 
-            # Final depth
-            if depth == 0:
-                return self.score(game, self)
+        # Final depth
+        if depth == 0:
+            return self.score(game, self)
 
 
-            or move in game.get_legal_moves():
+        for move in game.get_legal_moves():
 
-                # Forecast a level deeper
-                v = max(v, alpha_beta_max(game.forecast_move(move)), depth - 1, alpha, beta))
+            # Forecast a level deeper
+            v = max(v, alpha_beta_max(game.forecast_move(move), depth - 1, alpha, beta))
 
-                if v <= alpha:
-                    return v
+            if v <= alpha:
+                return v
 
-                beta = min(beta, v)
+            beta = min(beta, v)
 
-            return v
+        return v
+
+
+    # Call the helper functions and return a result
