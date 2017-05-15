@@ -278,7 +278,7 @@ class MinimaxPlayer(IsolationPlayer):
         legal_moves = game.get_legal_moves()
 
         # Control flow for situations where we don't have any legal moves.
-        if not legal_moves  or len(legal_moves) == 0:
+        if not legal_moves:
              best_move =  (-1, -1)
              return best_move
 
@@ -289,17 +289,15 @@ class MinimaxPlayer(IsolationPlayer):
         for move in legal_moves:
             temp_score = self.min_value(game.forecast_move(move), depth - 1)
 
-            if temp_score > best_score:
-
-                # Update best scores and moves
-                best_score = temp_score
-                best_move = move
-
+            # Update best scores and moves
+            best_score, best_move = max((temp_score, move), (best_score, best_move))
+            
         return best_move
 
     def max_value(self, game, depth):
         """
-
+        Modeled after pseudo code
+        https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
         """
         # FIXME improve docstring here
 
@@ -319,7 +317,8 @@ class MinimaxPlayer(IsolationPlayer):
 
     def min_value(self, game, depth):
         """
-
+        Modeled after pseudo code
+        https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
         """
         # FIXME improve docstring here
 
@@ -469,35 +468,16 @@ class AlphaBetaPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
-
-        # FIXME The following functions are basically mirror images,
-        # with the exception of min and max. I think we could work to make
-        # these function names a little better.
-
-        # TODO It strikes me that we're using this "terminal state" code in
-        # several places. Might be cleaner to refactor and recycle.
-        # FIXME this is not the first time I've commented this in here.
-
-        # TODO Are there performance gains that could be realized here
-        # by reordering values?
-
-        # FIXME added out of habit, but do we really need this here? This is
-        # going to be the first thing we hit -- no recursion.
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        if depth == 0:
-            return self.score(game, self)
 
-        # Intialize empty variables
+        # Intialize empty variables and return legal moves
         best_move = (-1, -1)
         best_score = float("-inf")
-
         legal_moves = game.get_legal_moves()
 
         # Control flow to check for legal moves available
-        # FIXME Again, I'm a little perplexe by the need to this additional
-        # check.
-        if not legal_moves or len(legal_moves)==0:
+        if not legal_moves:
             return best_move
 
         # In the case where we have moves to work with, search the game tree
@@ -506,11 +486,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
             v = self.alpha_beta_min(game.forecast_move(move), depth - 1, alpha, beta)
 
-            # FIXME clear up documentation in both of these level
-
-            if v > best_score:
-                best_score = v
-                best_move = move
+            best_score, best_move = max((v, move), (best_score, best_move))
 
             if best_score >= beta:
                 return move
@@ -589,6 +565,3 @@ class AlphaBetaPlayer(IsolationPlayer):
             beta = min(beta, v)
 
         return v
-
-
-    # Call the helper functions and return a result
