@@ -34,14 +34,6 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-
-    # FIXME I think we might be able to look at score methods in the player classes
-    # for more context on how this should be done.
-
-    # FIXME Check the testing code -- it looks as though the titles for our players
-    # could be different here...?
-
     # Cover the win/lose scenarios
     if game.is_loser(player):
         return float("-inf")
@@ -49,8 +41,6 @@ def custom_score(game, player):
     elif game.is_winner(player):
         return float("inf")
 
-    # Score optional moves. In this case, I'm just using a modified version of the
-    # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
         def center_classification(legal_moves):
@@ -66,7 +56,7 @@ def custom_score(game, player):
         my_center_bonus = center_classification(game.get_legal_moves(player))
         opponent_center_bonus = center_classification(game.get_legal_moves(player))
 
-        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
+        return float((my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus))
 
 
 def custom_score_2(game, player):
@@ -98,8 +88,6 @@ def custom_score_2(game, player):
     elif game.is_winner(player):
         return float("inf")
 
-    # Score optional moves. In this case, I'm just using a modified version of the
-    # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
         def distance_from_center(legal_moves):
