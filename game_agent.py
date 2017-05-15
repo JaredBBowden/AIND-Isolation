@@ -53,13 +53,21 @@ def custom_score(game, player):
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
+        def center_classification(legal_moves):
+
+            if (3,3) in legal_moves:
+                return 10
+            else:
+                return 0
+
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        try:
-            return my_moves / opponent_moves
-        except:
-            return my_moves
+        my_center_bonus = center_classification(game.get_legal_moves(player))
+        opponent_center_bonus = center_classification(game.get_legal_moves(player))
+
+        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
+
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -94,20 +102,29 @@ def custom_score_2(game, player):
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
-        def center_classification(legal_moves):
+        def distance_from_center(legal_moves):
+            """
+            Compute the mean absolute distance of all available legal moves
+            from the center square.
 
-            if (3,3) in legal_moves:
-                return 5
-            else:
+            Assumes a 7x7 board
+            """
+            distance_from_center = [abs(x[0] - 3) + abs(x[1] - 3) for x in legal_moves]
+
+            try:
+                return sum(distance_from_center) / float(len(distance_from_center))
+            except:
                 return 0
 
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        my_center_bonus = center_classification(game.get_legal_moves(player))
-        opponent_center_bonus = center_classification(game.get_legal_moves(player))
+        my_abs_center_dist = distance_from_center(game.get_legal_moves(player))
+        opponent_abs_center_dist = distance_from_center(game.get_legal_moves(game.get_opponent(player)))
 
-        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
+        # NOTE: in alternative versions of this heuristic, the center_dist values are
+        # weighted according to specified parameters.
+        return (my_moves - my_abs_center_dist) - (opponent_moves - opponent_abs_center_dist)
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -141,20 +158,14 @@ def custom_score_3(game, player):
     # weighted my_move - opponent_moves evaluation function covered in lectures.
     else:
 
-        def center_classification(legal_moves):
-
-            if (3,3) in legal_moves:
-                return 10
-            else:
-                return 0
+        # Adjust weight to adjust the importance of opponent player moves
+        weight = 2.0
 
         my_moves = len(game.get_legal_moves(player))
         opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-        my_center_bonus = center_classification(game.get_legal_moves(player))
-        opponent_center_bonus = center_classification(game.get_legal_moves(player))
+        return my_moves - (opponent_moves * weight)
 
-        return (my_moves + my_center_bonus) - (opponent_moves - opponent_center_bonus)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
