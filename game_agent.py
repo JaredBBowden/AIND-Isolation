@@ -291,12 +291,13 @@ class MinimaxPlayer(IsolationPlayer):
 
             # Update best scores and moves
             best_score, best_move = max((temp_score, move), (best_score, best_move))
-            
+
         return best_move
+
 
     def max_value(self, game, depth):
         """
-        Modeled after pseudo code
+        Modeled after pseudocode:
         https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
         """
         # FIXME improve docstring here
@@ -315,9 +316,10 @@ class MinimaxPlayer(IsolationPlayer):
 
         return best_score
 
+
     def min_value(self, game, depth):
         """
-        Modeled after pseudo code
+        Modeled after pseudocode:
         https://github.com/aimacode/aima-pseudocode/blob/master/md/Minimax-Decision.md
         """
         # FIXME improve docstring here
@@ -379,6 +381,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Timer
         self.time_left = time_left
 
+
+        # TODO consider for future versions
         """
         # Get the current moves we have to work with
         legal_moves = game.get_legal_moves()
@@ -498,14 +502,13 @@ class AlphaBetaPlayer(IsolationPlayer):
 
     def alpha_beta_max(self, game, depth, alpha, beta):
         """
-        Helper function, as framed in AIMA text
+        Helper function, as framed in pseudocode:
+        https://github.com/aimacode/aima-pseudocode/blob/master/md/Alpha-Beta-Search.md
 
         Itterate through the game tree and compute an alpha threshold --
-        this will provide
+        this will provide the maximum LOWER bound.
 
         """
-        # FIXME add more detail to this doc string
-
         # Terminal state: timer
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
@@ -535,14 +538,13 @@ class AlphaBetaPlayer(IsolationPlayer):
 
     def alpha_beta_min(self, game, depth, alpha, beta):
         """
-        Helper function, as framed in AIMA text.
+        Helper function, as framed in pseudocode:
+        https://github.com/aimacode/aima-pseudocode/blob/master/md/Alpha-Beta-Search.md
 
         Itterate through the game tree and compute a beta threshold --
         the minimum UPPER bound.
 
         """
-        # FIXME add more detail to this doc string
-
         # Terminal state: timer (as above)
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
